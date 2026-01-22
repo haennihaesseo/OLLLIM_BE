@@ -1,0 +1,62 @@
+package haennihaesseo.sandoll.global.exception;
+
+import haennihaesseo.sandoll.global.response.ApiResponse;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    /**
+     * 엔티티 미존재(404) 처리
+     * Optional 가져올때 orElseThrow(EntityNotFoundException::new) 이용
+     */
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleEntityNotFoundException(EntityNotFoundException ex) {
+        return ApiResponse.fail(
+                HttpStatus.NOT_FOUND,
+                "NOT_FOUND",
+                ex.getMessage() != null ? ex.getMessage() : "리소스를 찾을 수 없습니다."
+        );
+    }
+
+    /**
+     * 데이터 무결성 위반(409) 처리
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        return ApiResponse.fail(
+                HttpStatus.CONFLICT,
+                "CONFLICT",
+                ex.getMessage() != null ? ex.getMessage() : "이미 사용 중인 값입니다."
+        );
+    }
+
+    /**
+     * 비즈니스 로직 일반 실패(400) 처리
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
+        return ApiResponse.fail(
+                HttpStatus.BAD_REQUEST,
+                "BUSINESS_ERROR",
+                ex.getMessage()
+        );
+    }
+
+    /**
+     * 마지막 안정망(500) 처리
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
+        return ApiResponse.fail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "INTERNAL_SERVER_ERROR",
+                ex.getMessage() != null ? ex.getMessage() : "예상치 못한 오류가 발생했습니다."
+        );
+    }
+}

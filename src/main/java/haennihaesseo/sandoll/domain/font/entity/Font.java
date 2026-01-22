@@ -1,16 +1,16 @@
 package haennihaesseo.sandoll.domain.font.entity;
 
+import haennihaesseo.sandoll.domain.font.entity.enums.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@Table(name = "fonts")
 public class Font {
 
     @Id
@@ -24,10 +24,6 @@ public class Font {
     @Column(name = "image_url", nullable = false)
     private String image_url;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "keyword", nullable = false)
-    private Keyword keyword;
-
     @Column(name = "price", nullable = false)
     private Integer price;
 
@@ -35,8 +31,26 @@ public class Font {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "bone", nullable = false)
-    private Bone bone;
+    @Column(name = "bone_keyword", nullable = false)
+    private Bone bone_Keyword;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_keyword", nullable = false)
+    private Target targetKeyword;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "situation_keyword", nullable = false)
+    private Situation situationKeyword;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "distance_keyword", nullable = false)
+    private Distance distanceKeyword;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "dynamic_keyword", nullable = false)
+    private Dynamic dynamicKeyword;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "speed_keyword", nullable = false)
+    private Speed speedKeyword;
 }
