@@ -22,7 +22,7 @@ public class Font {
     private String fontUrl;
 
     @Column(name = "image_url", nullable = false)
-    private String image_url;
+    private String imageUrl;
 
     @Column(name = "price", nullable = false)
     private Integer price;
@@ -32,7 +32,7 @@ public class Font {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "bone_keyword", nullable = false)
-    private Bone bone_Keyword;
+    private Bone boneKeyword;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "target_keyword", nullable = false)
