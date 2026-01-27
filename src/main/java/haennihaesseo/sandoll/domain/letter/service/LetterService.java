@@ -1,9 +1,6 @@
 package haennihaesseo.sandoll.domain.letter.service;
 
-import haennihaesseo.sandoll.domain.letter.dto.LetterDetailResponse;
-import haennihaesseo.sandoll.domain.letter.dto.LetterType;
-import haennihaesseo.sandoll.domain.letter.dto.ReceiveLetterResponse;
-import haennihaesseo.sandoll.domain.letter.dto.OrderStatus;
+import haennihaesseo.sandoll.domain.letter.dto.*;
 import haennihaesseo.sandoll.domain.letter.entity.Letter;
 import haennihaesseo.sandoll.domain.letter.entity.LetterStatus;
 import haennihaesseo.sandoll.domain.letter.entity.ReceiverLetterId;
@@ -144,5 +141,30 @@ public class LetterService {
                 letterRepository.save(letter);
             }
         }
+    }
+
+    public List<SendLetterResponse> getSentLettersByUser(Long userId, OrderStatus status) {
+
+        userRepository.findById(userId).orElseThrow(() -> new GlobalException(ErrorStatus.USER_NOT_FOUND));
+
+        List<Long> letterIds = (status.equals(OrderStatus.EARLIEST))
+                ? letterRepository.findIdLetterIdBySenderUserIdOrderByCreatedAtDesc(userId, LetterStatus.VISIBLE)
+                : letterRepository.findIdLetterIdBySenderUserIdOrderByCreatedAtAsc(userId, LetterStatus.VISIBLE);
+
+        List<SendLetterResponse> results = new ArrayList<>();
+
+        for (Long letterId : letterIds) {
+            Letter letter = letterRepository.findById(letterId)
+                    .orElseThrow(() -> new LetterException(LetterErrorStatus.LETTER_NOT_FOUND));
+
+            results.add(
+                    SendLetterResponse.builder()
+                            .letterId(letterId)
+                            .title(letter.getTitle())
+                            .createdAt(letter.getCreatedAt().toLocalDate())
+                            .build()
+            );
+        }
+        return results;
     }
 }

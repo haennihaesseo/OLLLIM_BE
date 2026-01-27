@@ -43,4 +43,12 @@ public class LetterController {
         return ApiResponse.success(LetterSuccessStatus.SUCCESS_203);
     }
 
+    @GetMapping("/sent")
+    public ResponseEntity<ApiResponse<List<SendLetterResponse>>> getOutbox(
+            @RequestParam(name = "userId") Long userId,
+            @RequestParam(name = "status") OrderStatus orderStatus
+    ){
+        List<SendLetterResponse> responses = letterService.getSentLettersByUser(userId, orderStatus);
+        return ApiResponse.success(LetterSuccessStatus.SUCCESS_204, responses);
+    }
 }
