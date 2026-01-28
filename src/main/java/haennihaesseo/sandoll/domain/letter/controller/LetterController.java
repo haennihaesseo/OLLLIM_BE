@@ -1,15 +1,18 @@
 package haennihaesseo.sandoll.domain.letter.controller;
 
+import haennihaesseo.sandoll.domain.letter.dto.request.LetterDeleteRequest;
+import haennihaesseo.sandoll.domain.letter.dto.response.LetterDetailResponse;
+import haennihaesseo.sandoll.domain.letter.dto.request.OrderStatus;
+import haennihaesseo.sandoll.domain.letter.dto.response.ReceiveLetterResponse;
+import haennihaesseo.sandoll.domain.letter.dto.response.SendLetterResponse;
 import haennihaesseo.sandoll.global.auth.principal.UserPrincipal;
-import haennihaesseo.sandoll.domain.letter.dto.*;
 import haennihaesseo.sandoll.domain.letter.service.LetterService;
 import haennihaesseo.sandoll.domain.letter.status.LetterSuccessStatus;
-import haennihaesseo.sandoll.domain.user.entity.User;
 import haennihaesseo.sandoll.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/letter")
 @RequiredArgsConstructor
+@Slf4j
 public class LetterController {
 
     private final LetterService letterService;
@@ -26,6 +30,7 @@ public class LetterController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(name = "status") OrderStatus orderStatus
     ) {
+        log.info("receive 컨트롤러");
         Long userId = userPrincipal.getUser().getUserId();
         List<ReceiveLetterResponse> responses = letterService.getReceivedLettersByUser(userId, orderStatus);
         return ApiResponse.success(LetterSuccessStatus.SUCCESS_201, responses);

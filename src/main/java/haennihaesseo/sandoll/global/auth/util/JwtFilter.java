@@ -31,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
     log.info("[JWT FILTER] path={}, authHeader={}", request.getRequestURI(), request.getHeader("Authorization"));
 
     String token = extractToken(request);
-
+    log.info("[JWT FILTER] token={}", token);
     // 1) 토큰 없으면 그냥 통과
     if (token == null || token.isBlank()) {
       filterChain.doFilter(request, response);
@@ -39,9 +39,11 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     try {
+      log.info("validate 시작");
       jwtUtil.validateAccessToken(token);
+      log.info("검증 긑");
       Long userId = jwtUtil.getUserIdFromAccessToken(token);
-
+      log.info("userId = {}", userId);
       User user = userRepository.findByUserId(userId)
           .orElseThrow(() -> new GlobalException(ErrorStatus.NOT_FOUND));
 

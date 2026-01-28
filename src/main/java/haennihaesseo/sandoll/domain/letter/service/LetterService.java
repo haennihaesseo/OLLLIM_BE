@@ -1,6 +1,9 @@
 package haennihaesseo.sandoll.domain.letter.service;
 
-import haennihaesseo.sandoll.domain.letter.dto.*;
+import haennihaesseo.sandoll.domain.letter.converter.LetterConverter;
+import haennihaesseo.sandoll.domain.letter.dto.request.LetterType;
+import haennihaesseo.sandoll.domain.letter.dto.request.OrderStatus;
+import haennihaesseo.sandoll.domain.letter.dto.response.*;
 import haennihaesseo.sandoll.domain.letter.entity.Letter;
 import haennihaesseo.sandoll.domain.letter.entity.LetterStatus;
 import haennihaesseo.sandoll.domain.letter.entity.ReceiverLetterId;
@@ -10,7 +13,6 @@ import haennihaesseo.sandoll.domain.letter.status.LetterErrorStatus;
 import haennihaesseo.sandoll.domain.letter.exception.LetterException;
 import haennihaesseo.sandoll.domain.letter.repository.LetterRepository;
 import haennihaesseo.sandoll.domain.letter.repository.ReceiverLetterRepository;
-import haennihaesseo.sandoll.domain.user.entity.User;
 import haennihaesseo.sandoll.domain.user.repository.UserRepository;
 import haennihaesseo.sandoll.global.exception.GlobalException;
 import haennihaesseo.sandoll.global.status.ErrorStatus;
@@ -30,6 +32,7 @@ public class LetterService {
     private final ReceiverLetterRepository receiverLetterRepository;
     private final UserRepository userRepository;
     private final WordRepository wordRepository;
+    private final LetterConverter letterConverter;
 
     public List<ReceiveLetterResponse> getReceivedLettersByUser(Long userId, OrderStatus status) {
 
@@ -78,47 +81,10 @@ public class LetterService {
         }
 
         log.info("최종 응답 생성");
-        LetterDetailResponse result = LetterDetailResponse.builder()
-                .letterId(letterId)
-                .title(letter.getTitle())
-                .sender(letter.getSenderName())
-                .content(letter.getContent())
-                .bgm(
-                        letter.getBgm() != null ?
-                            LetterDetailResponse.BgmInfo.builder()
-                                    .bgmId(letter.getBgm().getBgmId())
-                                    .bgmUrl(letter.getBgm().getBgmUrl())
-                                    .build()
-                                : null
-                )
-                .template(
-                        letter.getTemplate() != null ?
-                            LetterDetailResponse.TemplateInfo.builder()
-                                    .templateId(letter.getTemplate().getTemplateId())
-                                    .templateUrl(letter.getTemplate().getImageUrl())
-                                    .build()
-                                : null
-                )
-                .font(
-                        letter.getDefaultFont() != null ?
-                            LetterDetailResponse.FontInfo.builder()
-                                    .fontId(letter.getDefaultFont().getFontId())
-                                    .fontUrl(letter.getDefaultFont().getFontUrl())
-                                    .build()
-                                : null
-                )
-                .voice(
-                        letter.getDefaultFont() != null ?
-                            LetterDetailResponse.VoiceInfo.builder()
-                                    .voiceId(letter.getVoice().getVoiceId())
-                                    .voiceUrl(letter.getVoice().getVoiceUrl())
-                                    .build()
-                                : null
-                )
-                .words(wordInfos)
-                .build();
 
-        return  result;
+        return letterConverter.toLetterDetailResponse(letter, letter.getBgm(),
+                        letter.getTemplate(), letter.getDefaultFont(),
+                        letter.getVoice(), words);
     }
 
     public void hideLetter(Long userId, LetterType letterType, List<Long> letterIds) {

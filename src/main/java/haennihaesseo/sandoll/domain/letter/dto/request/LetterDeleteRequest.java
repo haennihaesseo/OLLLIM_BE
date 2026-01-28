@@ -1,4 +1,4 @@
-package haennihaesseo.sandoll.domain.letter.dto;
+package haennihaesseo.sandoll.domain.letter.dto.request;
 
 import lombok.Getter;
 

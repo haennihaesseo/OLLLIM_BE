@@ -1,4 +1,4 @@
-package haennihaesseo.sandoll.domain.letter.dto;
+package haennihaesseo.sandoll.domain.letter.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,11 +8,10 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @Builder
-public class SendLetterResponse {
+public class ReceiveLetterResponse {
     private Long letterId;
-    private String title;
+    private String sender;
     private LocalDate createdAt;
 }

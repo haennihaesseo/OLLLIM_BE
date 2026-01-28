@@ -1,6 +1,5 @@
-package haennihaesseo.sandoll.domain.letter.dto;
+package haennihaesseo.sandoll.domain.letter.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,11 +8,10 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @Builder
-public class ReceiveLetterResponse {
+public class SendLetterResponse {
     private Long letterId;
-    private String sender;
+    private String title;
     private LocalDate createdAt;
 }
