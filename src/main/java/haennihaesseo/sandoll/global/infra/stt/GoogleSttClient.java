@@ -101,7 +101,6 @@ public class GoogleSttClient {
         double wordOrder = 0;
 
         for (SpeechRecognitionResult result : response.getResultsList()) {
-            log.info("result: {}", result);
             if (result.getAlternativesCount() == 0) continue;
 
             SpeechRecognitionAlternative alternative = result.getAlternatives(0);
