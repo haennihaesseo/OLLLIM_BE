@@ -26,7 +26,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class LetterService {
+public class LetterBoxService {
 
     private final LetterRepository letterRepository;
     private final ReceiverLetterRepository receiverLetterRepository;
