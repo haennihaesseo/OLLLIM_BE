@@ -3,7 +3,9 @@ package haennihaesseo.sandoll.domain.font.service;
 
 import haennihaesseo.sandoll.domain.font.entity.Font;
 import haennihaesseo.sandoll.domain.font.repository.FontRepository;
+import haennihaesseo.sandoll.global.exception.GlobalException;
 import haennihaesseo.sandoll.global.infra.AwsS3Client;
+import haennihaesseo.sandoll.global.status.ErrorStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,10 @@ public class FontUploadService {
    */
   @Transactional
   public int uploadFonts(List<MultipartFile> fonts, List<String> fontNames, String directory) {
+    if (fonts.size() != fontNames.size()) {
+      throw new GlobalException(ErrorStatus.BAD_REQUEST);
+    }
+
     int uploadCount = 0;
     for (MultipartFile font : fonts) {
       String fileUrl = s3Client.uploadFile(directory, font);
