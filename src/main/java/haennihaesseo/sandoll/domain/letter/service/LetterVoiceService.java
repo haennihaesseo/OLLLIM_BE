@@ -4,7 +4,7 @@ import haennihaesseo.sandoll.domain.font.entity.Font;
 import haennihaesseo.sandoll.domain.font.repository.FontRepository;
 import haennihaesseo.sandoll.domain.letter.cache.CachedLetter;
 import haennihaesseo.sandoll.domain.letter.cache.CachedLetterRepository;
-import haennihaesseo.sandoll.domain.letter.converter.LetterVoiceConverter;
+import haennihaesseo.sandoll.domain.letter.converter.LetterConverter;
 import haennihaesseo.sandoll.domain.letter.dto.response.VoiceAnalysisResponse;
 import haennihaesseo.sandoll.domain.letter.exception.LetterException;
 import haennihaesseo.sandoll.domain.letter.status.LetterErrorStatus;
@@ -24,7 +24,7 @@ public class LetterVoiceService {
   private final CachedLetterRepository cachedLetterRepository;
   private final PythonAnalysisClient pythonAnalysisClient;
   private final FontRepository fontRepository;
-  private final LetterVoiceConverter letterVoiceConverter;
+  private final LetterConverter letterConverter;
 
   public VoiceAnalysisResponse analyzeVoice(String letterId) {
     // Redis에서 CachedLetter 조회
@@ -34,7 +34,7 @@ public class LetterVoiceService {
     log.info("[분석 요청] letterId={}, content={}", letterId, cachedLetter.getContent());
 
     // 파이썬 서버에 분석 요청
-    PythonVoiceAnalysisRequest request = letterVoiceConverter.toAnalysisRequest(cachedLetter);
+    PythonVoiceAnalysisRequest request = letterConverter.toAnalysisRequest(cachedLetter);
     PythonVoiceAnalysisResponse pythonResponse = pythonAnalysisClient.requestVoiceAnalysis(request);
 
     log.info("[분석 완료] letterId={}, 추천 폰트: {}", letterId, pythonResponse.getRecommendedFonts());
@@ -42,6 +42,6 @@ public class LetterVoiceService {
     // 추천 폰트 정보 이름으로 매칭 후 응답 변환
     List<Font> recommendedFonts = fontRepository.findByNameIn(pythonResponse.getRecommendedFonts());
 
-    return letterVoiceConverter.toVoiceAnalysisResponse(pythonResponse.getAnalysisResult(), recommendedFonts);
+    return letterConverter.toVoiceAnalysisResponse(pythonResponse.getAnalysisResult(), recommendedFonts);
   }
 }
