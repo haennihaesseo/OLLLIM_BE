@@ -31,10 +31,12 @@ public class LetterShareController {
     )
     @GetMapping("/{letterId}/share")
     public ResponseEntity<ApiResponse<SecretLetterKeyResponse>> getSecretLetterKey(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Parameter(description = "편지의 고유키", required = true)
             @PathVariable(name = "letterId") Long letterId
     ) {
-        SecretLetterKeyResponse response = letterShareService.getLetterSecretKeyByLetterId(letterId);
+        Long userId = userPrincipal.getUser().getUserId();
+        SecretLetterKeyResponse response = letterShareService.getLetterSecretKeyByLetterId(userId, letterId);
         return ApiResponse.success(LetterSuccessStatus.SUCCESS_205, response);
     }
 
