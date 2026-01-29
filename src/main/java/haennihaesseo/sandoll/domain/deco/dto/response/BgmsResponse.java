@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 public class BgmsResponse {
 
-    public List<BgmDto> bgms;
+    private List<BgmDto> bgms;
 
     @Builder
     public record BgmDto(Long bgmId, String bgmUrl, List<String> keyword, String name) {};
