@@ -1,66 +1,60 @@
 package haennihaesseo.sandoll.domain.letter.controller;
 
-import haennihaesseo.sandoll.domain.letter.dto.request.LetterDeleteRequest;
-import haennihaesseo.sandoll.domain.letter.dto.response.LetterDetailResponse;
-import haennihaesseo.sandoll.domain.letter.dto.request.OrderStatus;
-import haennihaesseo.sandoll.domain.letter.dto.response.ReceiveLetterResponse;
-import haennihaesseo.sandoll.domain.letter.dto.response.SendLetterResponse;
-import haennihaesseo.sandoll.global.auth.principal.UserPrincipal;
+import haennihaesseo.sandoll.domain.letter.dto.request.LetterInfoRequest;
+import haennihaesseo.sandoll.domain.letter.dto.response.VoiceSaveResponse;
 import haennihaesseo.sandoll.domain.letter.service.LetterService;
 import haennihaesseo.sandoll.domain.letter.status.LetterSuccessStatus;
 import haennihaesseo.sandoll.global.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
+@Tag(name = "Letter Write", description = "편지 작성 API")
 @RestController
 @RequestMapping("/api/letter")
 @RequiredArgsConstructor
 @Slf4j
 public class LetterController {
 
-    private final LetterService letterService;
+  private final LetterService letterService;
 
-    @GetMapping("/received")
-    public ResponseEntity<ApiResponse<List<ReceiveLetterResponse>>> getInbox(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam(name = "status") OrderStatus orderStatus
-    ) {
-        Long userId = userPrincipal.getUser().getUserId();
-        List<ReceiveLetterResponse> responses = letterService.getReceivedLettersByUser(userId, orderStatus);
-        return ApiResponse.success(LetterSuccessStatus.SUCCESS_201, responses);
-    }
+  @Operation(
+      summary = "[3.1] 녹음 파일 저장 및 STT 편지 내용 조회, 편지 작성 키 발급"
+  )
+  @PostMapping("/voice")
+  public ResponseEntity<ApiResponse<VoiceSaveResponse>> saveVoiceFile(
+      @RequestPart(value = "voice") MultipartFile voiceFile
+  ) {
+    VoiceSaveResponse responses = letterService.saveVoiceFile(voiceFile);
+    return ApiResponse.success(LetterSuccessStatus.SUCCESS_301, responses);
+  }
 
-    @GetMapping("/{letterId}")
-    public ResponseEntity<ApiResponse<LetterDetailResponse>> getLetterDetail(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable(name = "letterId") Long letterId
-    ){
-        LetterDetailResponse response = letterService.getLetterDetailsByLetter(letterId);
-        return ApiResponse.success(LetterSuccessStatus.SUCCESS_202, response);
-    }
+  @Operation(
+      summary = "[3.2] 편지 정보 입력 및 내용 수정"
+  )
+  @PatchMapping("/{letterId}")
+  public ResponseEntity<ApiResponse<Void>> inputLetterInfo(
+      @RequestHeader("letterKey") String letterKey,
+      @PathVariable String letterId,
+      @RequestBody @Valid LetterInfoRequest request
+  ) {
+    letterService.inputLetterInfo(letterId, letterKey, request);
 
-    @PostMapping("/delete")
-    public ResponseEntity<ApiResponse<Void>> deleteLetter(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody LetterDeleteRequest request
-    ){
-        Long userId = userPrincipal.getUser().getUserId();
-        letterService.hideLetter(userId, request.getType(), request.getLetterIds());
-        return ApiResponse.success(LetterSuccessStatus.SUCCESS_203);
-    }
+    return ApiResponse.success(LetterSuccessStatus.SUCCESS_302);
+  }
 
-    @GetMapping("/sent")
-    public ResponseEntity<ApiResponse<List<SendLetterResponse>>> getOutbox(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam(name = "status") OrderStatus orderStatus
-    ){
-        Long userId = userPrincipal.getUser().getUserId();
-        List<SendLetterResponse> responses = letterService.getSentLettersByUser(userId, orderStatus);
-        return ApiResponse.success(LetterSuccessStatus.SUCCESS_204, responses);
-    }
 }
