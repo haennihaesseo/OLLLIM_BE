@@ -30,10 +30,8 @@ public class LetterController {
 
   private final LetterService letterService;
 
-  @Operation(
-      summary = "[3.1] 녹음 파일 저장 및 STT 편지 내용 조회, 편지 작성 키 발급"
-  )
-  @PostMapping("/voice")
+  @Operation(summary = "[3.1] 녹음 파일 저장 및 STT 편지 내용 조회, 편지 작성 키 발급")
+  @PostMapping(value = "/voice", consumes = "multipart/form-data")
   public ResponseEntity<ApiResponse<VoiceSaveResponse>> saveVoiceFile(
       @RequestPart(value = "voice") MultipartFile voiceFile
   ) {
