@@ -40,6 +40,7 @@ public class LetterBoxController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable(name = "letterId") Long letterId
     ){
+        Long userId = userPrincipal.getUser().getUserId();
         LetterDetailResponse response = letterBoxService.getLetterDetailsByLetter(letterId);
         return ApiResponse.success(LetterSuccessStatus.SUCCESS_202, response);
     }
