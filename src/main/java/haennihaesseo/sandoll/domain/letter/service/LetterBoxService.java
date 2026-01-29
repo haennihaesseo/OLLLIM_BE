@@ -38,7 +38,7 @@ public class LetterBoxService {
 
         userRepository.findById(userId).orElseThrow(() -> new GlobalException(ErrorStatus.USER_NOT_FOUND));
 
-        List<Long> letterIds = (status.equals(OrderStatus.EARLIEST))
+        List<Long> letterIds = (status.equals(OrderStatus.LATEST))
                 ? receiverLetterRepository.findIdLetterIdByIdReceiverIdOrderByCreatedAtDesc(userId)
                 : receiverLetterRepository.findIdLetterIdByIdReceiverIdOrderByCreatedAtAsc(userId);
 
