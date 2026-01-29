@@ -13,30 +13,30 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BgmController {
 
-    private BgmService bgmService;
+    private final BgmService bgmService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> createBgms(
-            @RequestHeader(name = "letterKey") String letterKey
+            @RequestHeader(name = "letterId") String letterId
     ) {
-        bgmService.createBgmsByLetter(letterKey);
+        bgmService.createBgmsByLetter(letterId);
         return ApiResponse.success(DecoSuccessStatus.SUCCESS_403);
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<BgmsResponse>> getAllBgms(
-            @RequestHeader(name = "letterKey") String letterKey
+            @RequestHeader(name = "letterId") String letterId
     ) {
-        BgmsResponse response = bgmService.getBgmsByLetterKey(letterKey);
+        BgmsResponse response = bgmService.getBgmsByLetterKey(letterId);
         return ApiResponse.success(DecoSuccessStatus.SUCCESS_404, response);
     }
 
     @PostMapping("/select")
     public ResponseEntity<ApiResponse<Void>> selectBgms(
-            @RequestHeader(name = "letterKey") String letterKey,
+            @RequestHeader(name = "letterId") String letterId,
             @RequestParam(name = "bgmId", required = false) Long bgmId
     ){
-        bgmService.saveBgmOnLetter(letterKey, bgmId);
+        bgmService.saveBgmOnLetter(letterId, bgmId);
         return ApiResponse.success(DecoSuccessStatus.SUCCESS_405);
     }
 }
