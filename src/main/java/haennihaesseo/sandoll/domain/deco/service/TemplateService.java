@@ -39,7 +39,7 @@ public class TemplateService {
 
     /**
      * preview 이미지 선택한 템플릿 내용 길이에 맞게 적용
-     * @param letterKey
+     * @param letterId
      * @param templateId
      * @return
      */
@@ -56,6 +56,9 @@ public class TemplateService {
         Size size = Size.fromLength(length);
 
         Template setTemplate = templateRepository.findByNameAndSize(template.getName(), size);
+
+        if (setTemplate == null)
+            throw new DecoException(DecoErrorStatus.TEMPLATE_NOT_FOUND);
 
         cachedLetter.setTemplateId(setTemplate.getTemplateId());
         cachedLetterRepository.save(cachedLetter);
