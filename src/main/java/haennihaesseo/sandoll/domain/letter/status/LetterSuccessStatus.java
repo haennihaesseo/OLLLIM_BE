@@ -18,6 +18,8 @@ public enum LetterSuccessStatus implements BaseSuccessStatus {
 
     SUCCESS_301(HttpStatus.CREATED, "SUCCESS_301", "음성 업로드에 성공하였습니다."),
     SUCCESS_302(HttpStatus.OK, "SUCCESS_302", "편지 정보 입력에 성공했습니다."),
+    SUCCESS_303(HttpStatus.OK, "SUCCESS_303", "목소리 분석에 성공하였습니다."),
+    SUCCESS_305(HttpStatus.OK, "SUCCESS_305", "편지 조회에 성공하였습니다."),
 
     SUCCESS_501(HttpStatus.CREATED, "SUCCESS_501", "편지 아이디를 발급했습니다."),
 

@@ -6,9 +6,12 @@ import haennihaesseo.sandoll.global.auth.handler.OAuthLoginSuccessHandler;
 import haennihaesseo.sandoll.global.auth.util.JwtFilter;
 import haennihaesseo.sandoll.global.response.ApiResponse;
 import haennihaesseo.sandoll.global.status.ErrorStatus;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -35,6 +38,9 @@ public class SecurityConfig {
   private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
   private final ObjectMapper objectMapper;
 
+  @Value("${app.server-url}")
+  private String serverUrl;
+
   private static final String[] PUBLIC_URLS = {
       "/",
       "/oauth2/authorization/kakao",
@@ -44,10 +50,12 @@ public class SecurityConfig {
       "/swagger-ui.html",
       "/v3/api-docs/**",
       "/api/letter/voice",
-      "/api/letter/{letterId}",
+      "/api/letter",
       "/api/letter/view",
       "/api/font/upload",
-      "/api/deco/**"
+      "/api/deco/**",
+      "/api/letter/font",
+      "/api/letter/content"
   };
 
   private static final String[] ALLOWED_ORIGINS = {
@@ -59,7 +67,9 @@ public class SecurityConfig {
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(Arrays.asList(ALLOWED_ORIGINS));
+    List<String> origins = new ArrayList<>(Arrays.asList(ALLOWED_ORIGINS));
+    origins.add(serverUrl);
+    config.setAllowedOrigins(origins);
     config.setAllowedMethods(Collections.singletonList("*"));
     config.setAllowedHeaders(Collections.singletonList("*"));
     config.setAllowCredentials(true);
