@@ -6,8 +6,11 @@ import haennihaesseo.sandoll.domain.letter.cache.CachedWord;
 import haennihaesseo.sandoll.domain.letter.dto.response.VoiceAnalysisResponse;
 import haennihaesseo.sandoll.domain.letter.dto.response.VoiceAnalysisResponse.RecommendFont;
 import haennihaesseo.sandoll.domain.letter.dto.response.VoiceSaveResponse;
+import haennihaesseo.sandoll.domain.letter.dto.response.LetterDetailResponse;
+import haennihaesseo.sandoll.domain.letter.dto.response.WritingLetterContentResponse;
 import haennihaesseo.sandoll.global.infra.python.dto.PythonVoiceAnalysisRequest;
 import haennihaesseo.sandoll.global.infra.stt.SttResult;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -72,6 +75,30 @@ public class LetterConverter {
     return VoiceAnalysisResponse.builder()
         .result(analysisResult)
         .fonts(recommendFonts)
+        .build();
+  }
+
+  public WritingLetterContentResponse toWritingLetterContentResponse(CachedLetter cachedLetter, String fontName) {
+    List<WritingLetterContentResponse.WritingWordInfo> wordInfos = cachedLetter.getWords().stream()
+        .sorted(Comparator.comparingDouble(CachedWord::getWordOrder))
+        .map(w -> WritingLetterContentResponse.WritingWordInfo.builder()
+            .word(w.getWord())
+            .startTime(w.getStartTime())
+            .endTime(w.getEndTime())
+            .build())
+        .toList();
+
+    return WritingLetterContentResponse.builder()
+        .voiceUrl(cachedLetter.getVoiceUrl())
+        .duration(cachedLetter.getDuration())
+        .fontId(cachedLetter.getFontId())
+        .fontName(fontName)
+        .content(cachedLetter.getContent())
+        .title(cachedLetter.getTitle())
+        .sender(cachedLetter.getSender())
+        .bgmUrl(cachedLetter.getBgmUrl())
+        .templateUrl(cachedLetter.getTemplateUrl())
+        .words(wordInfos)
         .build();
   }
 }

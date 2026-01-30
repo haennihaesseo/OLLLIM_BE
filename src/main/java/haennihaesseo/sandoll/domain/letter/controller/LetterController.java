@@ -1,6 +1,7 @@
 package haennihaesseo.sandoll.domain.letter.controller;
 
 import haennihaesseo.sandoll.domain.letter.dto.request.LetterInfoRequest;
+import haennihaesseo.sandoll.domain.letter.dto.response.WritingLetterContentResponse;
 import haennihaesseo.sandoll.domain.letter.dto.response.VoiceAnalysisResponse;
 import haennihaesseo.sandoll.domain.letter.dto.response.VoiceSaveResponse;
 import haennihaesseo.sandoll.domain.letter.service.LetterService;
@@ -63,6 +64,7 @@ public class LetterController {
       @RequestHeader("letterId") String letterId
   ) {
     VoiceAnalysisResponse response = letterVoiceService.analyzeVoice(letterId);
+    //TODO : 문맥 분석 및 BGM 설정 추가
     return ApiResponse.success(LetterSuccessStatus.SUCCESS_303, response);
   }
 
@@ -77,6 +79,15 @@ public class LetterController {
     letterService.applyFont(letterId, fontId);
     return ApiResponse.success(LetterSuccessStatus.SUCCESS_304);
   }
+
+  @GetMapping("/content")
+  public ResponseEntity<ApiResponse<WritingLetterContentResponse>> getWritingLetterContent(
+      @RequestHeader("letterId") String letterId
+  ) {
+    WritingLetterContentResponse response = letterService.getWritingLetterContent(letterId);
+    return ApiResponse.success(LetterSuccessStatus.SUCCESS_305, response);
+  }
+
 
 
 }

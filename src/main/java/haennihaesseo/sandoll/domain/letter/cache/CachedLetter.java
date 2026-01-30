@@ -36,8 +36,10 @@ public class CachedLetter implements Serializable {
     private String recommendedVoiceFonts;
 
     private Long fontId;
+    private String fontUrl;
 
     private Long templateId;
+    private String templateUrl;
     private String bgmUrl;
 
     @Builder.Default
@@ -77,8 +79,9 @@ public class CachedLetter implements Serializable {
     }
 
 
-    public void setFontId(Long fontId) {
+    public void setFont(Long fontId, String fontUrl) {
         this.fontId = fontId;
+        this.fontUrl = fontUrl;
     }
 
     public void setRecommendedVoiceFonts(List<Font> fonts) {
@@ -87,5 +90,9 @@ public class CachedLetter implements Serializable {
             fontNames.add(font.getFontId().toString());
         }
         this.recommendedVoiceFonts = String.join(",", fontNames);
+    }
+
+    public void setTemplateUrl(String templateUrl) {
+        this.templateUrl = templateUrl;
     }
 }
