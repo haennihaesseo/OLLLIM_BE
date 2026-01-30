@@ -68,17 +68,6 @@ public class LetterController {
     return ApiResponse.success(LetterSuccessStatus.SUCCESS_303, response);
   }
 
-  @Operation(
-      summary = "[3.4] 목소리 분석 폰트 적용 / [3.7] 폰트 적용"
-  )
-  @PostMapping("/font")
-  public ResponseEntity<ApiResponse<Void>> applyFont(
-      @RequestHeader("letterId") String letterId,
-      @RequestBody @Valid Long fontId
-  ) {
-    letterService.applyFont(letterId, fontId);
-    return ApiResponse.success(LetterSuccessStatus.SUCCESS_304);
-  }
 
   @GetMapping("/content")
   public ResponseEntity<ApiResponse<WritingLetterContentResponse>> getWritingLetterContent(

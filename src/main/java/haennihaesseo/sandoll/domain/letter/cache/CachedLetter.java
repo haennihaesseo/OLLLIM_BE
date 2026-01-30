@@ -85,11 +85,11 @@ public class CachedLetter implements Serializable {
     }
 
     public void setRecommendedVoiceFonts(List<Font> fonts) {
-        List<String> fontNames = new ArrayList<>();
+        List<String> fontIds = new ArrayList<>();
         for (Font font : fonts) {
-            fontNames.add(font.getFontId().toString());
+            fontIds.add(font.getFontId().toString());
         }
-        this.recommendedVoiceFonts = String.join(",", fontNames);
+        this.recommendedVoiceFonts = String.join(",", fontIds);
     }
 
     public void setTemplateUrl(String templateUrl) {
