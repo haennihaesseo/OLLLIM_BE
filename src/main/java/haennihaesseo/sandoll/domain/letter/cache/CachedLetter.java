@@ -1,5 +1,7 @@
 package haennihaesseo.sandoll.domain.letter.cache;
 
+import haennihaesseo.sandoll.domain.deco.dto.response.BgmsResponse;
+import haennihaesseo.sandoll.domain.font.entity.Font;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +12,7 @@ import org.springframework.data.redis.core.TimeToLive;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -34,8 +37,10 @@ public class CachedLetter implements Serializable {
     private String contextKeywords;
     private String recommendedVoiceFonts;
 
+    private Long fontId;
+
     private Long templateId;
-    private String bgmUrl;
+    private BgmsResponse.BgmDto bgmDto;
 
     @Builder.Default
     private List<CachedWord> words = new ArrayList<>();
@@ -69,8 +74,20 @@ public class CachedLetter implements Serializable {
         this.templateId = templateId;
     }
 
-    public void setBgmUrl(String bgmUrl) {
-        this.bgmUrl = bgmUrl;
+    public void setBgmDto(BgmsResponse.BgmDto bgmDto) {
+        this.bgmDto = bgmDto;
     }
 
+
+    public void setFontId(Long fontId) {
+        this.fontId = fontId;
+    }
+
+    public void setRecommendedVoiceFonts(List<Font> fonts) {
+        List<String> fontIds = new ArrayList<>();
+        for (Font font : fonts) {
+            fontIds.add(font.getFontId().toString());
+        }
+        this.recommendedVoiceFonts = String.join(",", fontIds);
+    }
 }
