@@ -75,7 +75,7 @@ public class FontUploadService {
           .situationKeyword(situation)
           .distanceKeyword(distance)
           .boneKeyword(bone)
-          .targetKeyword(writer)
+          .writerKeyword(writer)
           .build());
 
       uploadCount++;
