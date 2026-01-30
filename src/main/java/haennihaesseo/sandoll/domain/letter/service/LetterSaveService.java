@@ -29,6 +29,7 @@ import haennihaesseo.sandoll.domain.letter.util.AESUtil;
 import haennihaesseo.sandoll.domain.user.entity.User;
 import haennihaesseo.sandoll.domain.user.repository.UserRepository;
 import haennihaesseo.sandoll.global.exception.GlobalException;
+import haennihaesseo.sandoll.global.infra.RedisClient;
 import haennihaesseo.sandoll.global.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,16 +58,17 @@ public class LetterSaveService {
     private final AESUtil aesUtil;
     private final PasswordEncoder passwordEncoder;
     private final LetterDetailService letterDetailService;
+    private final RedisClient redisClient;
 
     /**
      * 캐시의 편지 조회해서 저장 로직
      * @param userId
-     * @param letterKey
+     * @param letterId
      * @return
      */
     @Transactional
-    public SecretLetterKeyResponse saveLetterAndLink(Long userId, String letterKey){
-        CachedLetter cachedLetter = cachedLetterRepository.findById(letterKey)
+    public SecretLetterKeyResponse saveLetterAndLink(Long userId, String letterId){
+        CachedLetter cachedLetter = cachedLetterRepository.findById(letterId)
                 .orElseThrow(() -> new LetterException(LetterErrorStatus.LETTER_NOT_FOUND));
 
         User user = userRepository.findById(userId)
@@ -124,6 +126,10 @@ public class LetterSaveService {
 
         try{
             String secretLetterKey = aesUtil.encrypt(letter.getLetterId());
+            // 캐시에서 bgm 데이터 삭제
+            redisClient.deleteData("bgms", letterId);
+            // 캐시에서 letterId 제거
+            cachedLetterRepository.deleteById(letterId);
             return new SecretLetterKeyResponse(secretLetterKey);
         } catch(Exception e){
             log.warn("공유키 암호화 중 예외 발생: letterId = {}", letter.getLetterId(), e);
