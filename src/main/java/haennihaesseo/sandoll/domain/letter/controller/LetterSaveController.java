@@ -1,7 +1,10 @@
 package haennihaesseo.sandoll.domain.letter.controller;
 
+import haennihaesseo.sandoll.domain.letter.dto.request.LetterLinkViewRequest;
 import haennihaesseo.sandoll.domain.letter.dto.request.LetterPasswordRequest;
+import haennihaesseo.sandoll.domain.letter.dto.response.LetterDetailResponse;
 import haennihaesseo.sandoll.domain.letter.dto.response.SecretLetterKeyResponse;
+import haennihaesseo.sandoll.domain.letter.service.LetterDetailService;
 import haennihaesseo.sandoll.domain.letter.service.LetterSaveService;
 import haennihaesseo.sandoll.domain.letter.status.LetterSuccessStatus;
 import haennihaesseo.sandoll.global.auth.principal.UserPrincipal;
@@ -44,4 +47,13 @@ public class LetterSaveController {
         return ApiResponse.success(LetterSuccessStatus.SUCCESS_502);
     }
 
+    @GetMapping("/share")
+    public ResponseEntity<ApiResponse<LetterDetailResponse>> viewShareLetter(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(name = "secretLetterKey") String secretLetterKey
+    ){
+        Long userId = userPrincipal.getUser().getUserId();
+        LetterDetailResponse response = letterSaveService.viewLetterBehindShare(userId, secretLetterKey);
+        return ApiResponse.success(LetterSuccessStatus.SUCCESS_503, response);
+    }
 }

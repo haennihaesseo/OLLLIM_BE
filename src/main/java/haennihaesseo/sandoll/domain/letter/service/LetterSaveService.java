@@ -14,6 +14,7 @@ import haennihaesseo.sandoll.domain.font.status.FontErrorStatus;
 import haennihaesseo.sandoll.domain.letter.cache.CachedLetter;
 import haennihaesseo.sandoll.domain.letter.cache.CachedLetterRepository;
 import haennihaesseo.sandoll.domain.letter.cache.CachedWord;
+import haennihaesseo.sandoll.domain.letter.dto.response.LetterDetailResponse;
 import haennihaesseo.sandoll.domain.letter.dto.response.SecretLetterKeyResponse;
 import haennihaesseo.sandoll.domain.letter.entity.Letter;
 import haennihaesseo.sandoll.domain.letter.entity.LetterStatus;
@@ -54,6 +55,7 @@ public class LetterSaveService {
     private final WordRepository wordRepository;
     private final AESUtil aesUtil;
     private final PasswordEncoder passwordEncoder;
+    private final LetterDetailService letterDetailService;
 
     /**
      * 캐시의 편지 조회해서 저장 로직
@@ -146,6 +148,19 @@ public class LetterSaveService {
         }
         letter.setPassword(passwordEncoder.encode(password));
         letterRepository.save(letter);
+    }
+
+    public LetterDetailResponse viewLetterBehindShare(Long userId, String secretLetterKey) {
+        Long letterId = aesUtil.decrypt(secretLetterKey);
+
+        Letter letter = letterRepository.findById(letterId)
+                .orElseThrow(() -> new LetterException(LetterErrorStatus.LETTER_NOT_FOUND));
+
+        // 보낸 작성자가 아닌 경우
+        if (!letter.getSender().getUserId().equals(userId))
+            throw new LetterException(LetterErrorStatus.NOT_LETTER_OWNER);
+
+        return letterDetailService.getLetterDetails(letterId);
     }
 
 }
