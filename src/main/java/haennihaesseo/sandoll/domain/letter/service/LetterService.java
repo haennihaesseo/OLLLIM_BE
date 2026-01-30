@@ -82,8 +82,14 @@ public class LetterService {
     String newContent = request.getContent();
 
     if (!oldContent.equals(newContent)) {
-      List<CachedWord> updatedWords = updateWords(cachedLetter.getWords(), oldContent, newContent);
-      cachedLetter.setWords(updatedWords);
+      // 줄바꿈만 변경된 경우 단어 diff 생략
+      String normalizedOld = oldContent.replaceAll("\\s+", " ").trim();
+      String normalizedNew = newContent.replaceAll("\\s+", " ").trim();
+
+      if (!normalizedOld.equals(normalizedNew)) {
+        List<CachedWord> updatedWords = updateWords(cachedLetter.getWords(), oldContent, newContent);
+        cachedLetter.setWords(updatedWords);
+      }
       cachedLetter.setContent(newContent);
     }
 
