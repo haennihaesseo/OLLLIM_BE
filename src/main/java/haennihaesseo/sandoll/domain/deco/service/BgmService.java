@@ -76,7 +76,8 @@ public class BgmService {
             throw new DecoException(DecoErrorStatus.BGM_GENERATING);
         }
         try {
-            List<BgmsResponse.BgmDto> bgmDtos = objectMapper.readValue(jsonBgms, new TypeReference<List<BgmsResponse.BgmDto>>() {});
+            List<BgmsResponse.BgmDto> bgmDtos = objectMapper.readValue(jsonBgms, new TypeReference<List<BgmsResponse.BgmDto>>() {
+            });
             return BgmsResponse.builder().bgms(bgmDtos).build();
         } catch (JsonProcessingException e) {
             throw new GlobalException(ErrorStatus.JSON_PARSING_FAIL);

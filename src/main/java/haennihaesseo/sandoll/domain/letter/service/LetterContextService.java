@@ -1,5 +1,6 @@
 package haennihaesseo.sandoll.domain.letter.service;
 
+import haennihaesseo.sandoll.domain.font.service.FontContextRecommendService;
 import haennihaesseo.sandoll.domain.letter.cache.CachedLetter;
 import haennihaesseo.sandoll.domain.letter.cache.CachedLetterRepository;
 import haennihaesseo.sandoll.domain.letter.exception.LetterException;
@@ -9,6 +10,7 @@ import haennihaesseo.sandoll.global.infra.python.dto.ContextAnalysisRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 @RequiredArgsConstructor
@@ -17,25 +19,25 @@ public class LetterContextService {
     private final LetterService letterService;
     private final CachedLetterRepository cachedLetterRepository;
     private final PythonAnalysisClient pythonAnalysisClient;
+    private final FontContextRecommendService fontContextRecommendService;
 
-    public void recommendContextFont(String letterId){
-
-    }
-
-    private void contextAnalyze(String letterId){
+    public void contextAnalyze(String letterId){
         CachedLetter cachedLetter = cachedLetterRepository.findById(letterId)
                 .orElseThrow(() -> new LetterException(LetterErrorStatus.LETTER_NOT_FOUND));
 
         ContextAnalysisRequest request = new ContextAnalysisRequest(cachedLetter.getContent(), 1); // todo count=3 수정예정
 
+        // todo error 코드 추가 예정
         pythonAnalysisClient.requestContextAnalysis(request)
                 .subscribe(event -> {
                     if ("analyze".equals(event.getStep())) {
                         // 분석 결과 처리
+                        // 1. 바탕으로 폰트 추천 알고리즘 구축 FontRecommendService
+                        // 2. 해당 폰트 캐시에 저장
                     } else if ("done".equals(event.getStep())) {
                         // BGM 결과 처리
+                        // 1. bgm 결과 redis에 저장
                     }
                 });
     }
-
 }

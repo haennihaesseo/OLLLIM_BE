@@ -8,11 +8,13 @@ import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -47,15 +49,20 @@ public class PythonAnalysisClient {
     public Flux<BgmStepEvent> requestContextAnalysis(ContextAnalysisRequest request){
         log.info("[Python] 분석 요청 - content: {}", request.getContent());
 
-        webClient.post()
+        return webClient.post()
                 .uri("/api/bgm")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
+                // todo 4xx, 5xx 에러시 에러코드 추가 예정
                 .bodyToFlux(new ParameterizedTypeReference<ServerSentEvent<BgmStepEvent>>() {})
                 .mapNotNull(ServerSentEvent::data)
+                .timeout(Duration.ofMinutes(3)) // todo 3분 타임어택 걸어두었으나 추후 수정 예정
                 .doOnNext(event -> {
                     log.info("[Python] step: {}", event.getStep());
+                })
+                .doOnError(error -> {
+                    log.error("[Python] 에러 발생: {}", error.getMessage());
                 });
     }
 
