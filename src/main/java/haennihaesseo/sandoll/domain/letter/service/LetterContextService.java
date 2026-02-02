@@ -47,12 +47,8 @@ public class LetterContextService {
 
                     if ("error".equals(event.getStep())) {
                         String errorType = event.getErrorType();
-                        String message = event.getMessage();
-
                         if (errorType.equals("ANALYSIS_FAILED"))
                             throw new LetterException(LetterErrorStatus.LETTER_ANALYSIS_FAILED);
-                        if (errorType.equals("BGM_GENERATION_FAILED"))
-                            throw new DecoException(DecoErrorStatus.BGM_GENERATION_FAILED);
                     }
 
                     if ("analyze".equals(event.getStep())) {
