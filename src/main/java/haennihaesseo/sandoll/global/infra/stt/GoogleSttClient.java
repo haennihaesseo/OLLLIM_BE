@@ -2,6 +2,7 @@ package haennihaesseo.sandoll.global.infra.stt;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.*;
+import com.google.cloud.speech.v1.RecognitionConfig.AudioEncoding;
 import com.google.protobuf.ByteString;
 import haennihaesseo.sandoll.global.exception.GlobalException;
 import haennihaesseo.sandoll.global.status.ErrorStatus;
@@ -40,7 +41,7 @@ public class GoogleSttClient {
         try {
             byte[] audioBytes = audioFile.getBytes();
             String contentType = audioFile.getContentType();
-            RecognitionConfig.AudioEncoding encoding = getAudioEncoding(contentType);
+            RecognitionConfig.AudioEncoding encoding = AudioEncoding.WEBM_OPUS;
             int channelCount = detectOpusChannelCount(audioBytes);
 
             log.info("[STT] contentType={}, encoding={}, channelCount={}", contentType, encoding, channelCount);
@@ -63,9 +64,6 @@ public class GoogleSttClient {
                     .longRunningRecognizeAsync(config, audio)
                     .get();
 
-            log.info("Google STT 처리 완료");
-            log.info("응답 결과: {}", response.getResultsList());
-
             return parseResponse(response);
         } catch (IOException e) {
             log.error("Google STT 처리 실패", e);
@@ -86,11 +84,8 @@ public class GoogleSttClient {
                 .setLanguageCode(LANGUAGE_CODE)
                 .setEnableWordTimeOffsets(true)
                 .setEnableAutomaticPunctuation(true)
+                .setSampleRateHertz(48000) // webm 의 일반적인 샘플레이트, 현재 프론트에서 webm 만 보내므로 고정
                 .setModel("default");
-
-        if (channelCount > 0) {
-            builder.setAudioChannelCount(channelCount);
-        }
 
         return builder.build();
     }
@@ -159,20 +154,5 @@ public class GoogleSttClient {
 
     private double toSeconds(com.google.protobuf.Duration duration) {
         return duration.getSeconds() + duration.getNanos() / 1_000_000_000.0;
-    }
-
-    private RecognitionConfig.AudioEncoding getAudioEncoding(String contentType) {
-        if (contentType == null) {
-            return RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED;
-        }
-        return switch (contentType.toLowerCase()) {
-            case "audio/wav", "audio/wave", "audio/x-wav" -> RecognitionConfig.AudioEncoding.LINEAR16;
-            case "audio/flac" -> RecognitionConfig.AudioEncoding.FLAC;
-            case "audio/mp3", "audio/mpeg" -> RecognitionConfig.AudioEncoding.MP3;
-            case "audio/ogg" -> RecognitionConfig.AudioEncoding.OGG_OPUS;
-            case "audio/webm" -> RecognitionConfig.AudioEncoding.WEBM_OPUS;
-            case "audio/amr" -> RecognitionConfig.AudioEncoding.AMR;
-            default -> RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED;
-        };
     }
 }
