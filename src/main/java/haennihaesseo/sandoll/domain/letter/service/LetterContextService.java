@@ -33,7 +33,7 @@ public class LetterContextService {
         CachedLetter cachedLetter = cachedLetterRepository.findById(letterId)
                 .orElseThrow(() -> new LetterException(LetterErrorStatus.LETTER_NOT_FOUND));
 
-        ContextAnalysisRequest request = new ContextAnalysisRequest(cachedLetter.getContent(), 1); // todo count=3 수정예정
+        ContextAnalysisRequest request = new ContextAnalysisRequest(cachedLetter.getContent(), 3); // todo count=3 수정예정
 
         // todo error 코드 추가 예정
         pythonAnalysisClient.requestContextAnalysis(request)
@@ -43,10 +43,13 @@ public class LetterContextService {
                         JsonNode analysis = event.getData().get("analysis");
                         // 바탕으로 폰트 추천 알고리즘 구축 FontRecommendService 및 캐시에 저장
                         fontContextRecommendService.saveContextFontsInLetter(letterId, analysis);
+                        log.info("[폰트 추천 저장] letterId = {}", letterId);
                     } else if ("done".equals(event.getStep())) {
                         JsonNode bgms = event.getData().get("bgms");
+                        log.info("[생성된 bgm] bgms = {}", bgms);
                         // bgm 결과 redis에 저장
                         List<BgmsResponse.BgmDto> bgmDtos = letterConverter.toBgmDtos(bgms);
+                        log.info("[생성된 bgm 저장]");
                         try {
                             bgmService.saveBgmsAtRedis(letterId, bgmDtos);
                         } catch (JsonProcessingException e) {

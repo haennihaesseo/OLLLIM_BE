@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Distance {
-    CLOSE("가까운"), NEUTRAL("적당한"), FAR("먼");
+    CLOSE("친밀한"), NEUTRAL("덤덤한"), FAR("정중한");
 
     private final String korean;
 }

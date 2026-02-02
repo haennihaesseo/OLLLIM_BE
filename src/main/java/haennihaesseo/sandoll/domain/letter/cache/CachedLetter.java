@@ -36,6 +36,9 @@ public class CachedLetter implements Serializable {
 
     private List<ContextFontResponse> contextFonts;
 
+    private List<Long> contextFontIds;
+    private List<String> contextFontKeywords;
+
     private List<Long> voiceFontIds;
     private List<String> voiceFontKeywords;
 

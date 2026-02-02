@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Writer {
-    JUNIOR("어린"), YOUTH("젊은"), SENIOR("성숙한");
+    JUNIOR("발랄한"), YOUTH("젊은"), SENIOR("성숙한");
 
     private final String korean;
 }

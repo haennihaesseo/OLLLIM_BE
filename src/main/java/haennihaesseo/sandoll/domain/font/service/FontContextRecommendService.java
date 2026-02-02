@@ -10,6 +10,7 @@ import haennihaesseo.sandoll.domain.letter.cache.CachedLetterRepository;
 import haennihaesseo.sandoll.domain.letter.exception.LetterException;
 import haennihaesseo.sandoll.domain.letter.status.LetterErrorStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FontContextRecommendService {
     private final FontRepository fontRepository;
     private final CachedLetterRepository cachedLetterRepository;
@@ -31,8 +33,10 @@ public class FontContextRecommendService {
         Writer writer = Writer.valueOf(data.get("writer").asText());
         Situation situation = Situation.valueOf(data.get("situation").asText());
         Distance distance = Distance.valueOf(data.get("distance").asText());
+        log.info("[문맥 키워드] Bone = {}, Writer = {},  Situation = {}, Distance = {}", bone, writer, situation, distance);
 
         List<Font> recommendContextFonts = recommendFonts(bone, writer, situation, distance);
+        log.info("[문맥 분석 결과 추천 폰트] 추천된 폰트 이름 = {}", recommendContextFonts.stream().map(Font::getName).toList());
         cacheContextFonts(letterId, recommendContextFonts, bone, writer, situation, distance);
     }
 
@@ -69,6 +73,7 @@ public class FontContextRecommendService {
         if (font.getWriterKeyword() == writer) matched.add(writer.getKorean());
         if (font.getSituationKeyword() == situation) matched.add(situation.getKorean());
         if (font.getDistanceKeyword() == distance) matched.add(distance.getKorean());
+        log.info("[폰트별 키워드] font = {}, matched = {}", font.getName() ,matched);
         return matched;
     }
 
