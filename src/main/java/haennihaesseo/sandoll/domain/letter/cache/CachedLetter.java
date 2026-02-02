@@ -34,12 +34,16 @@ public class CachedLetter implements Serializable {
     private String title;
     private String sender;
 
+    private String contextFontIds;
     private String contextKeywords;
-    private String recommendedVoiceFonts;
+    private String voiceFontIds;
+    private String voiceFontKeywords;
 
     private Long fontId;
+    private String fontUrl;
 
     private Long templateId;
+    private String templateUrl;
     private BgmsResponse.BgmDto bgmDto;
 
     @Builder.Default
@@ -48,14 +52,6 @@ public class CachedLetter implements Serializable {
     @TimeToLive
     @Builder.Default
     private Long ttl = 3600L;  // 1시간 (초 단위)
-
-    public void addWord(CachedWord word) {
-        this.words.add(word);
-    }
-
-    public void addWords(List<CachedWord> words) {
-        this.words.addAll(words);
-    }
 
     public void setInfo(String title, String sender) {
         this.title = title;
@@ -79,15 +75,21 @@ public class CachedLetter implements Serializable {
     }
 
 
-    public void setFontId(Long fontId) {
+    public void setFont(Long fontId, String fontUrl) {
         this.fontId = fontId;
+        this.fontUrl = fontUrl;
     }
 
-    public void setRecommendedVoiceFonts(List<Font> fonts) {
+    public void setVoiceFonts(List<Font> fonts, List<String> keywords) {
         List<String> fontIds = new ArrayList<>();
         for (Font font : fonts) {
             fontIds.add(font.getFontId().toString());
         }
-        this.recommendedVoiceFonts = String.join(",", fontIds);
+        this.voiceFontIds = String.join(",", fontIds);
+        this.voiceFontKeywords = String.join(",", keywords);
+    }
+
+    public void setTemplateUrl(String templateUrl) {
+        this.templateUrl = templateUrl;
     }
 }
