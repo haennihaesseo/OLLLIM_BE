@@ -69,7 +69,6 @@ public class LetterController {
   ) {
     letterContextService.contextAnalyze(letterId);
     VoiceAnalysisResponse response = letterVoiceService.analyzeVoice(letterId);
-    //TODO : 문맥 분석
     return ApiResponse.success(LetterSuccessStatus.SUCCESS_303, response);
   }
 
