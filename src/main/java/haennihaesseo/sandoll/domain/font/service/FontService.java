@@ -3,9 +3,12 @@ package haennihaesseo.sandoll.domain.font.service;
 
 import haennihaesseo.sandoll.domain.deco.entity.enums.Size;
 import haennihaesseo.sandoll.domain.font.dto.response.RecommendFontResponse;
+import haennihaesseo.sandoll.domain.font.dto.response.RefreshFontResponse;
+import haennihaesseo.sandoll.domain.font.dto.response.RefreshFontResponse.RecommendFont;
 import haennihaesseo.sandoll.domain.font.entity.Font;
 import haennihaesseo.sandoll.domain.font.entity.enums.FontType;
 import haennihaesseo.sandoll.domain.font.exception.FontException;
+import haennihaesseo.sandoll.domain.font.converter.FontConverter;
 import haennihaesseo.sandoll.domain.font.repository.FontRepository;
 import haennihaesseo.sandoll.domain.font.status.FontErrorStatus;
 import haennihaesseo.sandoll.domain.letter.cache.CachedLetter;
@@ -28,6 +31,8 @@ public class FontService {
 
   private final CachedLetterRepository cachedLetterRepository;
   private final FontRepository fontRepository;
+  private final FontConverter fontConverter;
+  private final int SELECT_COUNT = 3; // 한 번에 추천할 폰트 개수
 
   /**
    * 폰트 적용
@@ -66,89 +71,70 @@ public class FontService {
     cachedLetterRepository.save(cachedLetter);
   }
 
-  public RecommendFontResponse getRecommendFonts(String letterId, FontType type) {
+  /**
+   * 추천 폰트 조회
+   * @param letterId
+   * @return RecommendFontResponse
+   */
+  public RecommendFontResponse getRecommendFonts(String letterId) {
     // Redis에서 CachedLetter 조회
     CachedLetter cachedLetter = cachedLetterRepository.findById(letterId)
         .orElseThrow(() -> new LetterException(LetterErrorStatus.LETTER_NOT_FOUND));
 
-    if (type.equals(FontType.CONTEXT)) {
-      //TODO: 문맥 분석 기반 폰트 추천 구현
-      return null;
-    } else {
-      List<Long> fontIds = cachedLetter.getVoiceFontIds();
-      List<String> keywords = cachedLetter.getVoiceFontKeywords();
-      List<RecommendFontResponse.WritingRecommendFont> fonts = fontRepository.findAllByFontIdIn(
-              fontIds).stream()
-          .map(font -> RecommendFontResponse.WritingRecommendFont.builder()
-              .fontId(font.getFontId())
-              .name(font.getName())
-              .fontUrl(font.getFontUrl())
-              .keywords(keywords)
-              .build())
-          .toList();
+    List<Font> contextFonts = fontRepository.findAllByFontIdIn(cachedLetter.getContextFontIds());
+    List<RecommendFont> contextResponse = fontConverter.toRecommendFontList(contextFonts, cachedLetter.getContextFontKeywords());
 
-      return RecommendFontResponse.builder()
-          .type(FontType.VOICE)
-          .fonts(fonts)
-          .build();
-    }
+    List<Font> voiceFonts = fontRepository.findAllByFontIdIn(cachedLetter.getCurrentRecommendFontIds());
+    List<RecommendFont> voiceResponse = fontConverter.toRecommendFontList(voiceFonts, cachedLetter.getVoiceFontKeywords());
+
+    return fontConverter.toRecommendFontResponse(voiceResponse, contextResponse);
   }
 
-  public RecommendFontResponse refreshRecommendFonts(String letterId, FontType type) {
+  /**
+   * 추천 폰트 새로고침
+   * @param letterId
+   * @return RecommendFontResponse
+   */
+  public RefreshFontResponse refreshRecommendFonts(String letterId) {
     // Redis에서 CachedLetter 조회
     CachedLetter cachedLetter = cachedLetterRepository.findById(letterId)
         .orElseThrow(() -> new LetterException(LetterErrorStatus.LETTER_NOT_FOUND));
 
-    List<Long> recommendedFontIds = type == FontType.CONTEXT ? cachedLetter.getContextFontIds()
-        : cachedLetter.getVoiceFontIds();
-    List<Long> shownFontIds = type == FontType.CONTEXT ? cachedLetter.getShownContextFontIds()
-        : cachedLetter.getShownVoiceFontIds();
-    List<String> keywords = type == FontType.CONTEXT ? cachedLetter.getContextFontKeywords()
-        : cachedLetter.getVoiceFontKeywords();
+    List<Long> recommendedFontIds = cachedLetter.getVoiceFontIds();
+    List<Long> shownFontIds = cachedLetter.getShownVoiceFontIds();
 
     // 추천 폰트 중에서 아직 보여주지 않은 폰트 필터링
     List<Long> availableFontIds = new ArrayList<>(recommendedFontIds.stream()
         .filter(fontId -> !shownFontIds.contains(fontId))
         .toList());
 
-    int selectCount = Math.min(3, recommendedFontIds.size());
     List<Long> newRecommendedFontIds;
 
-    if (availableFontIds.size() >= selectCount) {
+    if (availableFontIds.size() >= SELECT_COUNT) {
       // 충분한 폰트가 남아있으면 랜덤으로 선택
       Collections.shuffle(availableFontIds, ThreadLocalRandom.current());
-      newRecommendedFontIds = new ArrayList<>(availableFontIds.subList(0, selectCount));
+      newRecommendedFontIds = new ArrayList<>(availableFontIds.subList(0, SELECT_COUNT));
     } else {
       // 남은 폰트를 모두 포함하고, shown 초기화 후 나머지를 채움
       newRecommendedFontIds = new ArrayList<>(availableFontIds);
       shownFontIds.clear();
 
-      int needed = selectCount - newRecommendedFontIds.size();
       List<Long> refill = new ArrayList<>(recommendedFontIds.stream()
           .filter(fontId -> !newRecommendedFontIds.contains(fontId))
           .toList());
       Collections.shuffle(refill, ThreadLocalRandom.current());
-      newRecommendedFontIds.addAll(refill.subList(0, Math.min(needed, refill.size())));
+      newRecommendedFontIds.addAll(refill.subList(0, Math.min(SELECT_COUNT - newRecommendedFontIds.size(), refill.size())));
     }
-
 
     // shown 리스트에 새로 추천된 폰트 반영
     shownFontIds.addAll(newRecommendedFontIds);
+    // currentRecommendFontIds 업데이트
+    cachedLetter.setCurrentRecommendFontIds(newRecommendedFontIds);
     cachedLetterRepository.save(cachedLetter);
 
-    List<RecommendFontResponse.WritingRecommendFont> fonts = fontRepository.findAllByFontIdIn(
-            newRecommendedFontIds).stream()
-        .map(font -> RecommendFontResponse.WritingRecommendFont.builder()
-            .fontId(font.getFontId())
-            .name(font.getName())
-            .fontUrl(font.getFontUrl())
-            .keywords(keywords)
-            .build())
-        .toList();
 
-    return RecommendFontResponse.builder()
-        .type(type)
-        .fonts(fonts)
-        .build();
+    List<Font> fonts = fontRepository.findAllByFontIdIn(newRecommendedFontIds);
+    return fontConverter.toRefreshFontResponse(FontType.VOICE, fonts,
+        cachedLetter.getVoiceFontKeywords());
   }
 }
