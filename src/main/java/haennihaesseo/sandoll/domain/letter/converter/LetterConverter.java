@@ -93,6 +93,7 @@ public class LetterConverter {
         .duration(cachedLetter.getDuration())
         .fontId(cachedLetter.getFontId())
         .fontName(fontName)
+        .fontUrl(cachedLetter.getFontUrl())
         .content(cachedLetter.getContent())
         .title(cachedLetter.getTitle())
         .sender(cachedLetter.getSender())
