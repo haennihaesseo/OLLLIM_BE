@@ -56,13 +56,17 @@ public class SecurityConfig {
       "/api/deco/**",
       "/api/letter/font",
       "/api/letter/content",
-      "/api/letter/font/refresh"
+      "/api/letter/font/refresh",
+      "/api/letter/home"
   };
 
   private static final String[] ALLOWED_ORIGINS = {
       "http://localhost:8081",
       "http://localhost:8080",
-      "http://localhost:3000"
+      "http://localhost:3000",
+      "https://olllim-fe.vercel.app",
+      "https://sandoll-sinhan.p-e.kr"
+
   };
 
   @Bean
