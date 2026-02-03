@@ -122,7 +122,7 @@ public class LetterBoxService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new GlobalException(ErrorStatus.USER_NOT_FOUND));
 
-            count = receiverLetterRepository.findIdLetterIdByIdReceiverIdOrderByCreatedAtAsc(user.getUserId()).stream().count();
+            count = receiverLetterRepository.countByIdReceiverId(userId);
         }
 
         return HomeResponse.builder()
