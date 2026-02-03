@@ -47,6 +47,11 @@ public class LetterService {
       throw new LetterException(LetterErrorStatus.TOO_SHORT_CONTENT);
     }
 
+    // 1000글자 초과일 경우 예외 처리
+    if (sttResult.getFullText().length() > 1000) {
+      throw new LetterException(LetterErrorStatus.TOO_LONG_CONTENT);
+    }
+
     // 2. S3 업로드
     String fileUrl = s3Client.uploadFile("voice", file);
 

@@ -63,7 +63,9 @@ public class ContentEditService {
     String oldContent = cachedLetter.getContent();
     String newContent = request.getContent();
 
-    //TODO: 1000단어 초과 시 오류
+    if(newContent.length() > 1000) {
+      throw new LetterException(LetterErrorStatus.TOO_LONG_CONTENT);
+    }
 
     // 정규화된 content로 실제 단어 변경 여부 확인
     String normalizedOld = normalizeContent(oldContent);
