@@ -13,6 +13,7 @@ public enum LetterErrorStatus implements BaseErrorStatus {
     NOT_LETTER_OWNER(HttpStatus.FORBIDDEN, "NOT_LETTER_OWNER", "편지 삭제 권한이 없습니다."),
     TOO_SHORT_CONTENT(HttpStatus.BAD_REQUEST, "TOO_SHORT_CONTENT", "편지 내용이 너무 짧습니다. 최소 10글자 이상 작성해주세요."),
     ALREADY_ANALYZED(HttpStatus.BAD_REQUEST, "ALREADY_ANALYZED", "이미 분석이 요청된 음성파일입니다."),
+    TOO_LONG_CONTENT(HttpStatus.BAD_REQUEST, "TOO_LONG_CONTENT", "편지 내용이 너무 깁니다. 최대 1000글자 이하로 작성해주세요."),
 
 
     LETTER_NEED_PASSWORD(HttpStatus.UNAUTHORIZED, "LETTER_NEED_PASSWORD", "비밀번호가 필요합니다."),

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "receiver_letter")
 public class ReceiverLetter {
 
     @EmbeddedId

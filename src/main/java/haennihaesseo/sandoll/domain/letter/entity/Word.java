@@ -11,7 +11,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "words")
+@Table(
+        name = "words",
+        indexes = {
+                @Index(name = "idx_letter_id", columnList = "letter_id")
+        })
 public class Word {
 
     @Id
