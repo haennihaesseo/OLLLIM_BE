@@ -18,6 +18,7 @@ public class WritingLetterContentResponse {
   private String title;
   private String sender;
   private String bgmUrl;
+  private Double bgmSize;
   private String templateUrl;
   private List<WritingWordInfo> words;
 
