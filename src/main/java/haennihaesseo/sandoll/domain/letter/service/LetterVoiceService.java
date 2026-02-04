@@ -26,6 +26,8 @@ public class LetterVoiceService {
   private final FontRepository fontRepository;
   private final LetterConverter letterConverter;
 
+  private final int RECOMMEND_FONT_COUNT = 3;
+
   public VoiceAnalysisResponse analyzeVoice(String letterId) {
     //TODO: 이미 분석하고 있거나 분석된 경우 재분석 막기
 
@@ -46,8 +48,8 @@ public class LetterVoiceService {
     cachedLetter.setVoiceFonts(recommendedFonts, pythonResponse.getVoiceKeywords());
 
     // 앞에 3개 폰트만 추천으로 설정
-    if (recommendedFonts.size() > 3) {
-      recommendedFonts = recommendedFonts.subList(0, 3);
+    if (recommendedFonts.size() > RECOMMEND_FONT_COUNT) {
+      recommendedFonts = recommendedFonts.subList(0, RECOMMEND_FONT_COUNT);
     }
 
     // 현재 추천된 폰트 정보 캐쉬에 저장

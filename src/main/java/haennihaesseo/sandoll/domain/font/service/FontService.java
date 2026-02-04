@@ -37,8 +37,10 @@ public class FontService {
   private final CachedLetterRepository cachedLetterRepository;
   private final FontRepository fontRepository;
   private final FontConverter fontConverter;
-  private final int SELECT_COUNT = 3; // 한 번에 추천할 폰트 개수
   private final TemplateRepository templateRepository;
+
+  private final int SELECT_COUNT = 3; // 한 번에 추천할 폰트 개수
+  private final int ONE_LINE_WORD_COUNT = 20; // 한 줄에 들어가는 글자 수 기준
 
   /**
    * 폰트 적용
@@ -62,7 +64,7 @@ public class FontService {
     String content = cachedLetter.getContent();
     for (char c : content.toCharArray()) {
       if (c == '\n') {
-        charCount += 20;
+        charCount += ONE_LINE_WORD_COUNT;
       } else {
         charCount += 1;
       }
