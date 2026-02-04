@@ -33,8 +33,6 @@ public class LetterVoiceService {
     CachedLetter cachedLetter = cachedLetterRepository.findById(letterId)
         .orElseThrow(() -> new LetterException(LetterErrorStatus.LETTER_NOT_FOUND));
 
-    log.info("[분석 요청] letterId={}, content={}", letterId, cachedLetter.getContent());
-
     // 파이썬 서버에 분석 요청
     PythonVoiceAnalysisRequest request = letterConverter.toAnalysisRequest(cachedLetter);
     PythonVoiceAnalysisResponse pythonResponse = pythonAnalysisClient.requestVoiceAnalysis(request);

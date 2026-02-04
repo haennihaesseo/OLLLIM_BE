@@ -37,7 +37,6 @@ public class CustomOAuth2AuthorizationRequestResolver implements OAuth2Authoriza
     }
 
     String redirect = request.getParameter("redirect");
-    log.info("CustomOAuth2AuthorizationRequestResolver - redirect parameter: {}", redirect);
     if (redirect == null || redirect.isBlank()) {
       return authorizationRequest;
     }

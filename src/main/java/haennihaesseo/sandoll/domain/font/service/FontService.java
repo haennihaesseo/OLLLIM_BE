@@ -69,7 +69,6 @@ public class FontService {
     }
 
     Size size = Size.fromLength(charCount);
-    //TODO:추후 템플릿 저장 후 주석 풀기, 현재는 디폴트 무지 템플릿으로 설정
     Template setTemplate = templateRepository.findByNameAndSize("무지", size); // Default인 무지로 설정
     cachedLetter.setTemplateId(setTemplate.getTemplateId());
     cachedLetter.setTemplateUrl(setTemplate.getImageUrl());
