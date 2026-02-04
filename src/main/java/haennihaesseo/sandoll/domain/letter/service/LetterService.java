@@ -70,7 +70,6 @@ public class LetterService {
    * @param letterId
    * @param request
    */
-  @Transactional
   public void inputLetterInfo(String letterId, LetterInfoRequest request) {
     // Redis에서 CachedLetter 조회
     CachedLetter cachedLetter = cachedLetterRepository.findById(letterId)

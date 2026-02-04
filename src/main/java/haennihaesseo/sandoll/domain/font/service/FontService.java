@@ -45,7 +45,6 @@ public class FontService {
    * @param letterId
    * @param fontId
    */
-  @Transactional
   public void applyFont(String letterId, Long fontId) {
     // Redis에서 CachedLetter 조회
     CachedLetter cachedLetter = cachedLetterRepository.findById(letterId)
