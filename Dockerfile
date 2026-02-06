@@ -8,4 +8,4 @@ WORKDIR /app
 COPY *.jar app.jar
 
 # 애플리케이션 실행
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Duser.timezone=Asia/Seoul","-jar","app.jar"]
+ENTRYPOINT ["java","-Xms256m","-Xmx768m","-Djava.security.egd=file:/dev/./urandom","-Duser.timezone=Asia/Seoul","-jar","app.jar"]
