@@ -44,7 +44,7 @@ public class LetterSaveController {
     @PatchMapping("/password")
     public ResponseEntity<ApiResponse<Void>> updatePassword(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody @Valid LetterPasswordRequest letterPasswordRequest
+            @RequestBody LetterPasswordRequest letterPasswordRequest
     ){
         Long userId = userPrincipal.getUser().getUserId();
         letterSaveService.updateLetterPasswordBySecretLetterKey(userId, letterPasswordRequest.getSecretLetterKey(), letterPasswordRequest.getPassword());

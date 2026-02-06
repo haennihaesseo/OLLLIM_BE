@@ -10,6 +10,6 @@ public class LetterPasswordRequest {
     @Schema(description = "편지 비밀키", example = "UNk/Z/JAPhtCOyloN2DJaw==", requiredMode = Schema.RequiredMode.REQUIRED)
     private String secretLetterKey;
 
-    @Schema(description = "편지 비밀번호", example = "1234", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "편지 비밀번호", example = "1234", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String password;
 }
