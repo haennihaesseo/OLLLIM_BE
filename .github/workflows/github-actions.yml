@@ -51,6 +51,8 @@ jobs:
           name: app.jar
           path: .
 
+      - uses: docker/setup-buildx-action@v3
+      
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
@@ -66,27 +68,17 @@ jobs:
     needs: docker # docker job이 성공해야 실행됨
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Make Zip File
-        run: |
-          echo "${{ secrets.ENV_PROD }}" > .env.prod
-          zip -r ./olllim-deploy.zip appspec.yml docker-compose.yml .env.prod run.sh
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
         with:
-          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-          aws-region: ap-northeast-2
-
-      - name: Upload to S3
-        run: aws s3 cp olllim-deploy.zip s3://${{ secrets.BUCKET_NAME }}/olllim-deploy.zip
-
-      - name: Create Deployment
-        run: |
-          aws deploy create-deployment \
-            --application-name ${{ secrets.CODE_DEPLOY_APP_NAME }} \
-            --deployment-config-name CodeDeployDefault.OneAtATime \
-            --deployment-group-name ${{ secrets.CODE_DEPLOY_GROUP_NAME }} \
-            --s3-location bucket=${{ secrets.BUCKET_NAME }},bundleType=zip,key=olllim-deploy.zip
+          host: ${{ secrets.RELEASE_HOST }} 
+          username: ${{ secrets.RELEASE_USERNAME }}
+          key: ${{ secrets.RELEASE_KEY }} 
+          port: 22
+          script: |
+            # 기존에 S3 배포 시 만들던 .env.prod 파일을 서버에 직접 생성
+            echo "${{ secrets.ENV_PROD }}" > /home/ubuntu/.env.prod
+            
+            # 배포 스크립트 실행
+            sudo chmod +x /home/ubuntu/deploy.sh
+            sudo /home/ubuntu/deploy.sh
