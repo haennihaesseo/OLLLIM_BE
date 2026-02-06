@@ -150,7 +150,7 @@ public class LetterSaveService {
     @Transactional
     public void updateLetterPasswordBySecretLetterKey(Long userId, String secretLetterKey, String password) {
         Letter letter = decryptLetter(userId, secretLetterKey);
-        letter.setPassword(passwordEncoder.encode(password));
+        letter.setPassword(password != null ? passwordEncoder.encode(password) : null);
         letterRepository.save(letter);
     }
 
