@@ -70,7 +70,8 @@ public class SecurityConfig {
       "http://localhost:8080",
       "http://localhost:3000",
       "https://olllim-fe.vercel.app",
-      "https://sandoll-sinhan.p-e.kr"
+      "https://www.olllim.site",
+      "https://olllim.site"
 
   };
 
