@@ -1,5 +1,6 @@
 package haennihaesseo.sandoll.global.infra.stt;
 
+import com.google.api.gax.rpc.InvalidArgumentException;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.*;
 import com.google.cloud.speech.v1.RecognitionConfig.AudioEncoding;
@@ -22,7 +23,6 @@ import java.util.concurrent.ExecutionException;
 public class GoogleSttClient {
 
     private static final String LANGUAGE_CODE = "ko-KR";
-    private static final long SYNC_MAX_BYTES = 1_000_000; // 1MB 이하면 짧은 시간 걸리는 모델 사용
 
     private final SpeechSettings speechSettings;
 
@@ -38,19 +38,19 @@ public class GoogleSttClient {
         }
     }
 
-    public SttResult transcribe(MultipartFile audioFile) {
+    public SttResult transcribe(MultipartFile audioFile, int duration) {
         try {
             byte[] audioBytes = audioFile.getBytes();
             RecognitionConfig.AudioEncoding encoding = AudioEncoding.WEBM_OPUS;
 
-            return transcribeAudio(audioBytes, encoding);
+            return transcribeAudio(audioBytes, encoding, duration);
         } catch (IOException e) {
             log.error("오디오 파일 읽기 실패", e);
             throw new GlobalException(ErrorStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    private SttResult transcribeAudio(byte[] audioBytes, RecognitionConfig.AudioEncoding encoding) {
+    private SttResult transcribeAudio(byte[] audioBytes, RecognitionConfig.AudioEncoding encoding, int duration) {
         try (SpeechClient speechClient = SpeechClient.create(speechSettings)) {
             RecognitionConfig config = buildConfig(encoding);
             RecognitionAudio audio = RecognitionAudio.newBuilder()
@@ -59,10 +59,12 @@ public class GoogleSttClient {
 
             List<SpeechRecognitionResult> results;
 
-            if (audioBytes.length <= SYNC_MAX_BYTES) {
+            if (duration <= 60) { // 1분 이하면 동기 처리
+                log.info("1분 이하 오디오, 동기 STT 처리 시작");
                 RecognizeResponse response = speechClient.recognize(config, audio);
                 results = response.getResultsList();
             } else {
+                log.info("1분 초과 오디오, 비동기 STT 처리 시작");
                 LongRunningRecognizeResponse response = speechClient
                         .longRunningRecognizeAsync(config, audio)
                         .get();
@@ -70,7 +72,7 @@ public class GoogleSttClient {
             }
 
             return parseResults(results);
-        } catch (IOException e) {
+        } catch (IOException | InvalidArgumentException e) {
             log.error("Google STT 처리 실패", e);
             throw new GlobalException(ErrorStatus.STT_SERVICE_ERROR);
         } catch (InterruptedException e) {
