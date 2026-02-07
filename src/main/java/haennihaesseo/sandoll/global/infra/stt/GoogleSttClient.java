@@ -25,8 +25,10 @@ public class GoogleSttClient {
     private static final String LANGUAGE_CODE = "ko-KR";
 
     private final SpeechSettings speechSettings;
+    private final GcsClient gcsClient;
 
-    public GoogleSttClient() {
+    public GoogleSttClient(GcsClient gcsClient) {
+        this.gcsClient = gcsClient;
         try {
             GoogleCredentials credentials = GoogleCredentials.fromStream(
                     ResourceLoader.getResourceAsStream("google-stt-key.json"));
@@ -42,39 +44,47 @@ public class GoogleSttClient {
         try {
             byte[] audioBytes = audioFile.getBytes();
             RecognitionConfig.AudioEncoding encoding = AudioEncoding.WEBM_OPUS;
+            String contentType = audioFile.getContentType();
 
             log.info("[STT 요청] duration={}, 파일크기={}bytes, contentType={}, 파일명={}",
-                    duration, audioBytes.length, audioFile.getContentType(), audioFile.getOriginalFilename());
+                    duration, audioBytes.length, contentType, audioFile.getOriginalFilename());
 
-            return transcribeAudio(audioBytes, encoding, duration);
+            return transcribeAudio(audioBytes, encoding, duration, contentType);
         } catch (IOException e) {
             log.error("오디오 파일 읽기 실패", e);
             throw new GlobalException(ErrorStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    private SttResult transcribeAudio(byte[] audioBytes, RecognitionConfig.AudioEncoding encoding, int duration) {
+    private SttResult transcribeAudio(byte[] audioBytes, RecognitionConfig.AudioEncoding encoding, int duration, String contentType) {
+        String gcsUri = null;
         try (SpeechClient speechClient = SpeechClient.create(speechSettings)) {
             RecognitionConfig config = buildConfig(encoding);
 
             log.info("[STT Config] encoding={}, language={}, model={}",
                     config.getEncoding(), config.getLanguageCode(), config.getModel());
 
-            RecognitionAudio audio = RecognitionAudio.newBuilder()
-                    .setContent(ByteString.copyFrom(audioBytes))
-                    .build();
-
-            log.info("[STT Audio] content 크기={}bytes", audio.getContent().size());
-
             List<SpeechRecognitionResult> results;
 
-            if (duration <= 15) {
-                log.info("[STT] 동기 처리 시작 (duration={})", duration);
+            if (duration < 20) {
+                // 짧은 오디오: inline content로 동기 처리 (빠름)
+                RecognitionAudio audio = RecognitionAudio.newBuilder()
+                        .setContent(ByteString.copyFrom(audioBytes))
+                        .build();
+
+                log.info("[STT] 동기 처리 시작 (duration={}, inline content)", duration);
                 RecognizeResponse response = speechClient.recognize(config, audio);
                 log.info("[STT] 동기 처리 완료, 결과 개수={}", response.getResultsCount());
                 results = response.getResultsList();
             } else {
-                log.info("[STT] 비동기 처리 시작 (duration={})", duration);
+                // 긴 오디오: GCS URI로 비동기 처리
+                gcsUri = gcsClient.uploadAudio(audioBytes, contentType);
+
+                RecognitionAudio audio = RecognitionAudio.newBuilder()
+                        .setUri(gcsUri)
+                        .build();
+
+                log.info("[STT] 비동기 처리 시작 (duration={}, gcsUri={})", duration, gcsUri);
                 var operationFuture = speechClient.longRunningRecognizeAsync(config, audio);
                 log.info("[STT] 비동기 요청 전송됨, 응답 대기 중...");
                 LongRunningRecognizeResponse response = operationFuture.get();
@@ -96,6 +106,11 @@ public class GoogleSttClient {
         } catch (ExecutionException e) {
             log.error("[STT 에러] ExecutionException - 원인: {}", e.getCause() != null ? e.getCause().getMessage() : e.getMessage(), e);
             throw new GlobalException(ErrorStatus.STT_SERVICE_ERROR);
+        } finally {
+            // GCS에 업로드한 오디오 파일 정리
+            if (gcsUri != null) {
+                gcsClient.deleteAudio(gcsUri);
+            }
         }
     }
 
