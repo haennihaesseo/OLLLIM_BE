@@ -99,6 +99,9 @@ src/main/java/haennihaesseo/sandoll/
 ## ERD
 <img width="500" alt="올림ERD" src="https://github.com/user-attachments/assets/88198727-e375-412c-9b55-87c4557c76f1" />
 
+## 아키텍처 구조
+<img width="818" height="517" alt="image" src="https://github.com/user-attachments/assets/41ddda62-bed5-4836-a87d-f390d2682d1c" />
+
 
 ## 코드 컨벤션
 
